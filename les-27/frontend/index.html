@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Node education</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <form action="" class="chat-form">
+        <input type="text" name="message" id="message">
+        <button type="submit">Send</button>
+      </form>
+
+      <ul class="messages"></ul>
+    </div>
+
+    <script>
+
+      window.addEventListener('DOMContentLoaded', () => {
+        initChat();
+      });
+
+      function initChat() {
+        const chatForm = document.querySelector('.chat-form');
+        const messageField = chatForm.message;
+        const messagesHolder = document.querySelector('.messages');
+       
+       
+        chatForm.addEventListener('submit', publish);
+        subscribe();
+
+        function publish(e) {
+          e.preventDefault();
+
+          const message = messageField.value;
+          if (message) {
+            chatForm.classList.add('loading');
+            const formData = JSON.stringify({ message });
+
+            fetch('/publish', { method: 'POST', body: formData})
+              .then(data => {
+                messageField.value = '';
+                chatForm.classList.remove('loading');
+              });
+          }
+        }
+
+        function subscribe() {
+          fetch('/subscribe')
+            .then(response => response.json())
+            .then(data => {
+              addMessage(data.message);
+              subscribe();
+            })
+            .catch(() => setTimeout(subscribe, 500));
+        }
+      
+        function addMessage(messageText) {
+          const li = document.createElement('li');
+          li.innerText = messageText;
+          messagesHolder.appendChild(li);
+        }
+      }
+    </script>
+  </body>
+</html>
